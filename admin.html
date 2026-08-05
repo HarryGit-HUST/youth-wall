@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>团委后台管理 — 云端留言墙</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+</head>
+
+<body class="bg-slate-950 text-slate-100 min-h-screen p-4 md:p-8">
+
+    <!-- 登录弹窗 -->
+    <div id="login-modal" class="fixed inset-0 bg-slate-950 flex items-center justify-center p-4 z-50">
+        <div class="bg-slate-900 border border-slate-800 p-6 rounded-xl w-full max-w-md text-center">
+            <h2 class="text-xl font-bold text-amber-400 mb-4">🔐 校团委后台管理登录</h2>
+            <input type="password" id="admin-pass" placeholder="请输入管理员登录口令..."
+                class="w-full bg-slate-800 border border-slate-700 rounded p-3 mb-4 text-sm text-center outline-none focus:border-amber-400">
+            <button onclick="login()" class="w-full py-2.5 bg-amber-500 font-bold text-slate-950 rounded">验证登录</button>
+        </div>
+    </div>
+
+    <!-- 主界面 -->
+    <div class="max-w-6xl mx-auto">
+        <header class="flex justify-between items-center mb-6 pb-4 border-b border-slate-800">
+            <h1 class="text-xl font-bold text-amber-400">校团委招新留言后台控制台</h1>
+            <button onclick="location.reload()" class="text-xs bg-slate-800 px-3 py-1.5 rounded">刷新列表</button>
+        </header>
+
+        <!-- 标签卡片状态栏 -->
+        <div class="flex gap-2 mb-6">
+            <button onclick="switchTab(0)" id="tab-0"
+                class="px-4 py-2 rounded-lg text-sm font-bold bg-amber-500 text-slate-950">待审核 (0)</button>
+            <button onclick="switchTab(1)" id="tab-1"
+                class="px-4 py-2 rounded-lg text-sm font-bold bg-slate-800 text-slate-300">已通过 (已公开)</button>
+            <button onclick="switchTab(2)" id="tab-2"
+                class="px-4 py-2 rounded-lg text-sm font-bold bg-slate-800 text-slate-300">已驳回</button>
+        </div>
+
+        <!-- 列表表格/卡片 -->
+        <div id="admin-list" class="space-y-4">
+            <!-- 动态生成管理列表 -->
+        </div>
+    </div>
+
+    <script>
+        const SUPABASE_URL = "https://yvepocklhzfcazmcssem.supabase.co";
+        const SUPABASE_KEY = "sb_publishable_4BKM56OxqjtuDhD15L2Vbw_Jzgj0ndw";
+        const supabase = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+        // 设置团委管理通用口令 (硬编码或自行更改)
+        const ADMIN_TOKEN = "tuanwei2026";
+        let currentStatus = 0;
+
+        function login() {
+            const input = document.getElementById('admin-pass').value;
+            if (input === ADMIN_TOKEN) {
+                document.getElementById('login-modal').classList.add('hidden');
+                loadAdminData();
+            } else {
+                alert('口令错误！');
+            }
+        }
+
+        function switchTab(status) {
+            currentStatus = status;
+            [0, 1, 2].forEach(s => {
+                const btn = document.getElementById(`tab-${s}`);
+                if (s === status) {
+                    btn.className = "px-4 py-2 rounded-lg text-sm font-bold bg-amber-500 text-slate-950";
+                } else {
+                    btn.className = "px-4 py-2 rounded-lg text-sm font-bold bg-slate-800 text-slate-300";
+                }
+            });
+            loadAdminData();
+        }
+
+        async function loadAdminData() {
+            const { data, error } = await supabase.from('messages')
+                .select('*')
+                .eq('status', currentStatus)
+                .order('created_at', { ascending: false });
+
+            if (error) return alert('读取数据失败');
+
+            const container = document.getElementById('admin-list');
+            container.innerHTML = data.length === 0 ? '<p class="text-slate-500 text-center py-12">暂无数据</p>' : '';
+
+            data.forEach(item => {
+                container.innerHTML += `
+                    <div class="bg-slate-900 border border-slate-800 rounded-xl p-4 flex flex-col md:flex-row justify-between gap-4">
+                        <div class="flex-1">
+                            <div class="flex gap-2 text-xs mb-2">
+                                <span class="bg-slate-800 text-amber-400 px-2 py-0.5 rounded">${item.tag}</span>
+                                <span class="text-slate-400">${item.is_anonymous ? '匿名发布' : item.author_name}</span>
+                                <span class="text-slate-500">${new Date(item.created_at).toLocaleString()}</span>
+                            </div>
+                            <p class="text-sm text-slate-200 mb-3">${item.content}</p>
+                            
+                            <!-- 官方回复编辑框 -->
+                            <div class="flex gap-2 items-center">
+                                <input type="text" id="reply-${item.message_id}" value="${item.reply_content || ''}" placeholder="添加官方回复..." class="bg-slate-950 border border-slate-800 text-xs text-amber-300 p-2 rounded flex-1 outline-none">
+                                <button onclick="saveReply(${item.message_id})" class="text-xs bg-indigo-600 px-3 py-2 rounded font-bold">保存回复</button>
+                            </div>
+                        </div>
+
+                        <!-- 审核与控制按纽 -->
+                        <div class="flex md:flex-col justify-end gap-2 min-w-[120px]">
+                            ${currentStatus !== 1 ? `<button onclick="updateStatus(${item.message_id}, 1)" class="bg-emerald-600/30 text-emerald-300 border border-emerald-500/40 text-xs py-1.5 px-3 rounded hover:bg-emerald-600 hover:text-white">放行 (公开)</button>` : ''}
+                            ${currentStatus !== 2 ? `<button onclick="updateStatus(${item.message_id}, 2)" class="bg-amber-600/30 text-amber-300 border border-amber-500/40 text-xs py-1.5 px-3 rounded hover:bg-amber-600 hover:text-white">驳回 (隐藏)</button>` : ''}
+                            <button onclick="deleteMsg(${item.message_id})" class="bg-rose-600/30 text-rose-300 border border-rose-500/40 text-xs py-1.5 px-3 rounded hover:bg-rose-600 hover:text-white">物理删除</button>
+                        </div>
+                    </div>
+                `;
+            });
+        }
+
+        async function updateStatus(id, newStatus) {
+            await supabase.from('messages').update({ status: newStatus }).eq('message_id', id);
+            loadAdminData();
+        }
+
+        async function saveReply(id) {
+            const text = document.getElementById(`reply-${id}`).value;
+            await supabase.from('messages').update({ reply_content: text }).eq('message_id', id);
+            alert('官方回复更新成功！');
+            loadAdminData();
+        }
+
+        async function deleteMsg(id) {
+            if (confirm('确认物理删除该记录？不可恢复！')) {
+                await supabase.from('messages').delete().eq('message_id', id);
+                loadAdminData();
+            }
+        }
+    </script>
+</body>
+
+</html>
