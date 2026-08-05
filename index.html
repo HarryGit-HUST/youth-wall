@@ -5,11 +5,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>青声·星火相传 | 线上云端留言墙</title>
-    <!-- Tailwind CSS CDN -->
     <script src="https://cdn.tailwindcss.com"></script>
-    <!-- Supabase JS Client -->
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-    <!-- HTML2Canvas 海报生成工具 -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
     <style>
         body {
@@ -29,7 +26,7 @@
         }
 
         .glass-card {
-            background: rgba(25. 30, 60, 0.65);
+            background: rgba(25, 30, 60, 0.75);
             backdrop-filter: blur(12px);
             border: 1px solid rgba(255, 255, 255, 0.12);
             box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
@@ -43,10 +40,8 @@
 </head>
 
 <body class="min-h-screen relative pb-20">
-    <!-- 背景星空 Canvas -->
     <canvas id="canvas-bg"></canvas>
 
-    <!-- 顶部 Banner -->
     <header class="py-8 text-center px-4">
         <h1
             class="text-3xl md:text-5xl font-extrabold bg-clip-text text-transparent bg-gradient-to-r from-amber-200 via-amber-400 to-amber-100 tracking-wider">
@@ -55,9 +50,7 @@
         <p class="text-sm md:text-base text-slate-400 mt-2">校团委招新云端留言墙 — 万千声音，汇聚星光</p>
     </header>
 
-    <!-- 交互入口与固定专区 -->
     <main class="max-w-6xl mx-auto px-4">
-        <!-- 操作按钮 -->
         <div class="flex justify-center gap-4 mb-8">
             <button onclick="openModal(1)"
                 class="px-6 py-3 rounded-full bg-gradient-to-r from-amber-500 to-amber-600 text-slate-950 font-bold hover:scale-105 transition shadow-lg shadow-amber-500/20">
@@ -69,23 +62,21 @@
             </button>
         </div>
 
-        <!-- 往届成员寄语置顶专区 -->
         <section class="mb-10">
             <h2 class="text-lg font-bold text-amber-400 mb-4 flex items-center gap-2">
                 📌 往届成员寄语
             </h2>
             <div id="pinned-container" class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <!-- 动态填充置顶内容 -->
+                <p class="text-slate-500 text-sm">加载中...</p>
             </div>
         </section>
 
-        <!-- 留言与提问瀑布流 -->
         <section>
             <h2 class="text-lg font-bold text-slate-300 mb-4 flex items-center gap-2">
                 🌟 精彩留言 & 提问
             </h2>
             <div id="wall-container" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-                <!-- 动态卡片内容 -->
+                <p class="text-slate-500 text-sm">加载中...</p>
             </div>
         </section>
     </main>
@@ -101,7 +92,7 @@
                 <div>
                     <label class="block text-xs text-slate-400 mb-1">板块标签</label>
                     <select id="form-tag"
-                        class="w-full bg-slate-900/80 border border-slate-700 rounded-lg p-2.5 text-sm focus:border-amber-400 outline-none">
+                        class="w-full bg-slate-900/90 border border-slate-700 rounded-lg p-2.5 text-sm focus:border-amber-400 outline-none text-slate-100">
                         <option value="青年寄语">青年寄语</option>
                         <option value="大学期待">大学期待</option>
                         <option value="军训感悟">军训感悟</option>
@@ -116,14 +107,14 @@
                     </div>
                     <textarea id="form-content" maxlength="300" required rows="4" oninput="updateCharCount(this)"
                         placeholder="写下你的想法、寄语或对团委招新的提问..."
-                        class="w-full bg-slate-900/80 border border-slate-700 rounded-lg p-3 text-sm focus:border-amber-400 outline-none resize-none"></textarea>
+                        class="w-full bg-slate-900/90 border border-slate-700 rounded-lg p-3 text-sm focus:border-amber-400 outline-none resize-none text-slate-100"></textarea>
                 </div>
 
                 <div class="grid grid-cols-2 gap-4">
                     <div>
                         <label class="block text-xs text-slate-400 mb-1">发布身份</label>
                         <input type="text" id="form-author" placeholder="你的昵称/姓名"
-                            class="w-full bg-slate-900/80 border border-slate-700 rounded-lg p-2.5 text-sm focus:border-amber-400 outline-none">
+                            class="w-full bg-slate-900/90 border border-slate-700 rounded-lg p-2.5 text-sm focus:border-amber-400 outline-none text-slate-100">
                     </div>
                     <div class="flex items-end pb-2">
                         <label class="flex items-center gap-2 cursor-pointer text-sm text-slate-300">
@@ -136,13 +127,13 @@
 
                 <button type="submit"
                     class="w-full py-3 bg-amber-500 hover:bg-amber-600 font-bold text-slate-950 rounded-lg transition">
-                    安全提交并发送审核
+                    提交审核
                 </button>
             </form>
         </div>
     </div>
 
-    <!-- 海报预览弹窗 -->
+    <!-- 海报弹窗 -->
     <div id="poster-modal"
         class="fixed inset-0 bg-black/80 backdrop-blur-md hidden flex items-center justify-center p-4 z-50">
         <div class="flex flex-col items-center max-w-sm w-full">
@@ -171,22 +162,20 @@
         </div>
     </div>
 
-    <!-- 逻辑脚本 -->
     <script>
-        // 1. 初始化 Supabase 配置 (请替换为你自己的 Supabase 参数)
         const SUPABASE_URL = "https://yvepocklhzfcazmcssem.supabase.co";
         const SUPABASE_KEY = "sb_publishable_4BKM56OxqjtuDhD15L2Vbw_Jzgj0ndw";
-        const supabase = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
-        // 简略前端敏感词库拦截 (本地快速防骚扰)
+        // 修复变量名冲突问题
+        const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
         const SENSITIVE_WORDS = ["打架", "色情", "赌博", "广告", "外挂", "骂人"];
-
         let currentType = 1;
 
-        // 初始化星空 Canvas 动画
-        initCanvas();
-        // 初始加载留言
-        fetchMessages();
+        document.addEventListener('DOMContentLoaded', () => {
+            initCanvas();
+            fetchMessages();
+        });
 
         function openModal(type) {
             currentType = type;
@@ -214,7 +203,6 @@
             }
         }
 
-        // 提交留言
         async function submitMessage(e) {
             e.preventDefault();
             const content = document.getElementById('form-content').value.trim();
@@ -225,25 +213,24 @@
             if (!author && !isAnonymous) author = "热心同学";
             if (isAnonymous) author = "匿名小星火";
 
-            // 敏感词拦截判断
             for (let word of SENSITIVE_WORDS) {
                 if (content.includes(word)) {
-                    alert(`包含不当词汇 [${word}]，请修改后重试！`);
+                    alert(`包含敏感词汇 [${word}]，请修改后重试！`);
                     return;
                 }
             }
 
-            const { data, error } = await supabase.from('messages').insert([{
+            const { error } = await supabaseClient.from('messages').insert([{
                 type: currentType,
                 content: content,
                 author_name: author,
                 is_anonymous: isAnonymous,
                 tag: tag,
-                status: 0 // 默认为待审核
+                status: 0
             }]);
 
             if (error) {
-                alert('提交失败，请稍后再试！');
+                alert('提交失败：' + error.message);
             } else {
                 alert('提交成功！管理员将在30分钟内审核，通过后即可上墙。');
                 closeModal();
@@ -251,25 +238,28 @@
             }
         }
 
-        // 获取并展示数据
         async function fetchMessages() {
-            const { data, error } = await supabase.from('messages')
+            const { data, error } = await supabaseClient.from('messages')
                 .select('*')
-                .eq('status', 1)
+                .or('status.eq.1,is_pinned.eq.true')
                 .order('created_at', { ascending: false });
-
-            if (error) return;
 
             const pinnedContainer = document.getElementById('pinned-container');
             const wallContainer = document.getElementById('wall-container');
             pinnedContainer.innerHTML = '';
             wallContainer.innerHTML = '';
 
+            if (error || !data || data.length === 0) {
+                pinnedContainer.innerHTML = '<p class="text-slate-500 text-sm">暂无寄语</p>';
+                wallContainer.innerHTML = '<p class="text-slate-500 text-sm">暂无公开留言，快来抢沙发吧！</p>';
+                return;
+            }
+
             data.forEach(msg => {
                 const card = createCardHTML(msg);
                 if (msg.is_pinned) {
                     pinnedContainer.innerHTML += card;
-                } else {
+                } else if (msg.status === 1) {
                     wallContainer.innerHTML += card;
                 }
             });
@@ -304,7 +294,6 @@
             `;
         }
 
-        // 生成海报逻辑
         function generatePoster(content, author, date) {
             document.getElementById('poster-text').innerText = decodeURIComponent(content);
             document.getElementById('poster-author').innerText = `—— ${author}`;
@@ -321,29 +310,24 @@
             });
         }
 
-        // Canvas 背景动效
         function initCanvas() {
             const canvas = document.getElementById('canvas-bg');
             const ctx = canvas.getContext('2d');
             let stars = [];
-
             function resize() {
                 canvas.width = window.innerWidth;
                 canvas.height = window.innerHeight;
             }
             resize();
             window.addEventListener('resize', resize);
-
-            for (let i = 0; i < 70; i++) {
+            for (let i = 0; i < 60; i++) {
                 stars.push({
                     x: Math.random() * canvas.width,
                     y: Math.random() * canvas.height,
                     r: Math.random() * 1.5 + 0.5,
                     alpha: Math.random(),
-                    dx: (Math.random() - 0.5) * 0.2
                 });
             }
-
             function draw() {
                 ctx.clearRect(0, 0, canvas.width, canvas.height);
                 stars.forEach(s => {
