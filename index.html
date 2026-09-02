@@ -4,16 +4,16 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>校团委组织部招新 | 青声·星火相传留言墙</title>
-    <!-- 引入 方正仿宋简体 字体 CDN -->
-    <link href="https://cdn.jsdelivr.net/npm/cn-fontsource-fz-fang-song-z-02-s-regular/font.css" rel="stylesheet">
+    <title>共青团华中科技大学委员会组织部招新 | 青声·星火相传</title>
+    <!-- 引入 方正小标宋简体 WebFont CDN -->
+    <link href="https://cdn.jsdelivr.net/npm/cn-fontsource-fz-xiao-biao-song-b-05-s-regular/font.css" rel="stylesheet">
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
     <style>
-        /* 设置全局字体为 方正仿宋简体 */
+        /* 全局字体设置为 方正小标宋简体 */
         body {
-            font-family: "FZFangSong-Z02S", "方正仿宋简体", "FangSong", "STFangsong", "仿宋", "仿宋_GB2312", fangsong, serif;
+            font-family: "FZXiaoBiaoSong-B05S", "方正小标宋简体", "FZXiaoBiaoSongJS", "STSong", "SimSun", serif;
             background: #0a0c1b;
             color: #e2e8f0;
         }
@@ -52,19 +52,28 @@
 <body class="min-h-screen relative pb-20">
     <canvas id="canvas-bg"></canvas>
 
-    <header class="py-8 text-center px-4">
-        <div
-            class="inline-block px-3 py-1 bg-amber-500/10 border border-amber-500/30 rounded-full text-amber-400 text-xs font-bold mb-3 tracking-widest">
-            ✦ 校团委组织部招新专区 ✦
-        </div>
-        <h1
-            class="text-3xl md:text-5xl font-extrabold bg-clip-text text-transparent bg-gradient-to-r from-amber-200 via-amber-400 to-amber-100 tracking-wider">
-            青声 · 星火相传
+    <!-- 顶部 Banner：团徽 + 组织部全称(加大) + 活动主题(调小) -->
+    <header class="py-8 text-center px-4 flex flex-col items-center">
+        <!-- 高清共青团团徽 -->
+        <img src="https://upload.wikimedia.org/wikipedia/commons/e/e0/Emblem_of_the_Communist_Youth_League_of_China.svg"
+            alt="共青团团徽" class="w-16 h-16 md:w-20 md:h-20 mb-3 drop-shadow-[0_0_12px_rgba(251,191,36,0.5)]">
+
+        <!-- 组织部全称（字号放大） -->
+        <h1 class="text-2xl sm:text-3xl md:text-4xl font-extrabold text-amber-300 tracking-wide drop-shadow-md">
+            共青团华中科技大学委员会组织部
         </h1>
-        <p class="text-base md:text-lg text-slate-300 font-medium mt-3 tracking-wide">
+
+        <!-- “青声·星火相传” (字号调小作为专区名称) -->
+        <div
+            class="mt-3 px-4 py-1 bg-amber-500/10 border border-amber-500/30 rounded-full text-amber-200 text-sm md:text-base font-bold tracking-widest inline-block">
+            ✦ 招新云端留言墙：「青声 · 星火相传」 ✦
+        </div>
+
+        <!-- 招新口号 -->
+        <p class="text-sm md:text-base text-slate-300 font-medium mt-3 tracking-widest">
             起于平凡 · 臻于至善
         </p>
-        <p class="text-xs md:text-sm text-slate-400 mt-1">万千声音，汇聚星光 — 期待你的加入</p>
+        <p class="text-xs text-slate-400 mt-1">万千声音，汇聚星光 — 期待你的加入</p>
     </header>
 
     <main class="max-w-6xl mx-auto px-4">
@@ -123,7 +132,7 @@
                         <span id="char-count">0/300</span>
                     </div>
                     <textarea id="form-content" maxlength="300" required rows="4" oninput="updateCharCount(this)"
-                        placeholder="写下对组织部招新的想法、寄语或提问..."
+                        placeholder="写下对华中大团委组织部招新的想法、寄语或提问..."
                         class="w-full bg-slate-900/90 border border-slate-700 rounded-lg p-3 text-sm focus:border-amber-400 outline-none resize-none text-slate-100"></textarea>
                 </div>
 
@@ -156,7 +165,7 @@
         <div class="flex flex-col items-center max-w-sm w-full">
             <div id="poster-card"
                 class="bg-gradient-to-br from-slate-900 via-indigo-950 to-slate-900 p-6 rounded-2xl border border-amber-500/30 text-slate-100 w-full shadow-2xl relative overflow-hidden">
-                <div class="text-xs text-amber-400 font-bold mb-2">✦ 校团委组织部 · 专属留言卡 ✦</div>
+                <div class="text-[11px] text-amber-400 font-bold mb-2">✦ 共青团华中科技大学委员会组织部 ✦</div>
                 <div id="poster-text" class="text-base font-medium my-4 leading-relaxed"></div>
                 <div
                     class="border-t border-slate-700/60 pt-4 mt-4 flex justify-between items-center text-xs text-slate-400">
@@ -165,7 +174,7 @@
                         <p id="poster-date"></p>
                     </div>
                     <div class="text-right">
-                        <p class="text-amber-400 font-bold">校团委组织部招新</p>
+                        <p class="text-amber-400 font-bold text-[11px]">青声 · 星火相传</p>
                         <p class="text-[10px] text-slate-400">起于平凡 · 臻于至善</p>
                     </div>
                 </div>
@@ -181,6 +190,7 @@
 
     <script>
         const SUPABASE_URL = "https://yvepocklhzfcazmcssem.supabase.co";
+        // 自动填入你提供的密钥，无需手动修改
         const SUPABASE_KEY = "sb_publishable_4BKM56OxqjtuDhD15L2Vbw_Jzgj0ndw";
 
         const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
@@ -319,7 +329,7 @@
         function downloadPoster() {
             html2canvas(document.getElementById('poster-card')).then(canvas => {
                 const link = document.createElement('a');
-                link.download = '校团委组织部-招新海报.png';
+                link.download = '华中大团委组织部-招新海报.png';
                 link.href = canvas.toDataURL();
                 link.click();
             });
