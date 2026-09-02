@@ -4,19 +4,31 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>团委后台管理 — 云端留言墙</title>
+    <title>校团委组织部 — 招新留言管理后台</title>
+    <link href="https://cdn.jsdelivr.net/npm/cn-fontsource-fz-fang-song-z-02-s-regular/font.css" rel="stylesheet">
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <style>
+        body {
+            font-family: "FZFangSong-Z02S", "方正仿宋简体", "FangSong", "STFangsong", "仿宋", "仿宋_GB2312", fangsong, serif;
+        }
+
+        input,
+        button,
+        select {
+            font-family: inherit;
+        }
+    </style>
 </head>
 
 <body class="bg-slate-950 text-slate-100 min-h-screen p-4 md:p-8">
 
-    <!-- 真实 Auth 登录框 -->
     <div id="login-modal" class="fixed inset-0 bg-slate-950 flex items-center justify-center p-4 z-50">
         <div class="bg-slate-900 border border-slate-800 p-6 rounded-xl w-full max-w-md text-center">
-            <h2 class="text-xl font-bold text-amber-400 mb-4">🔐 团委管理员安全登录</h2>
+            <h2 class="text-xl font-bold text-amber-400 mb-1">🔐 校团委组织部后台</h2>
+            <p class="text-xs text-slate-400 mb-4">起于平凡 · 臻于至善</p>
             <form onsubmit="adminLogin(event)" class="space-y-3">
-                <input type="email" id="admin-email" required placeholder="管理员邮箱..."
+                <input type="email" id="admin-email" required placeholder="干事管理员邮箱..."
                     class="w-full bg-slate-800 border border-slate-700 rounded p-2.5 text-sm text-slate-100 outline-none focus:border-amber-400">
                 <input type="password" id="admin-password" required placeholder="管理员密码..."
                     class="w-full bg-slate-800 border border-slate-700 rounded p-2.5 text-sm text-slate-100 outline-none focus:border-amber-400">
@@ -25,10 +37,12 @@
         </div>
     </div>
 
-    <!-- 主界面 -->
     <div class="max-w-6xl mx-auto">
         <header class="flex justify-between items-center mb-6 pb-4 border-b border-slate-800">
-            <h1 class="text-xl font-bold text-amber-400">校团委招新留言后台控制台</h1>
+            <div>
+                <h1 class="text-xl font-bold text-amber-400">校团委组织部招新控制台</h1>
+                <p class="text-xs text-slate-400">起于平凡 · 臻于至善</p>
+            </div>
             <button onclick="supabaseClient.auth.signOut().then(()=>location.reload())"
                 class="text-xs bg-slate-800 px-3 py-1.5 rounded text-rose-400">退出登录</button>
         </header>
@@ -37,19 +51,19 @@
             <button onclick="switchTab(0)" id="tab-0"
                 class="px-4 py-2 rounded-lg text-sm font-bold bg-amber-500 text-slate-950">待审核</button>
             <button onclick="switchTab(1)" id="tab-1"
-                class="px-4 py-2 rounded-lg text-sm font-bold bg-slate-800 text-slate-300">已放行 (已公开)</button>
+                class="px-4 py-2 rounded-lg text-sm font-bold bg-slate-800 text-slate-300">已放行 (公开展示)</button>
             <button onclick="switchTab(2)" id="tab-2"
                 class="px-4 py-2 rounded-lg text-sm font-bold bg-slate-800 text-slate-300">已驳回</button>
         </div>
 
         <div id="admin-list" class="space-y-4">
-            <p class="text-slate-500 text-center py-12">请先完成登录</p>
+            <p class="text-slate-500 text-center py-12">请先登录</p>
         </div>
     </div>
 
     <script>
         const SUPABASE_URL = "https://yvepocklhzfcazmcssem.supabase.co";
-            const SUPABASE_KEY = "sb_publishable_4BKM56OxqjtuDhD15L2Vbw_Jzgj0ndw";
+        const SUPABASE_KEY = "sb_publishable_4BKM56OxqjtuDhD15L2Vbw_Jzgj0ndw";
         const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
         let currentStatus = 0;
@@ -94,7 +108,7 @@
             if (error) return alert('读取数据失败：' + error.message);
 
             const container = document.getElementById('admin-list');
-            container.innerHTML = data.length === 0 ? '<p class="text-slate-500 text-center py-12">暂无对应状态的数据</p>' : '';
+            container.innerHTML = data.length === 0 ? '<p class="text-slate-500 text-center py-12">暂无数据</p>' : '';
 
             data.forEach(item => {
                 container.innerHTML += `
@@ -108,7 +122,7 @@
                             <p class="text-sm text-slate-200 mb-3">${item.content}</p>
                             
                             <div class="flex gap-2 items-center">
-                                <input type="text" id="reply-${item.message_id}" value="${item.reply_content || ''}" placeholder="追加官方回复..." class="bg-slate-950 border border-slate-800 text-xs text-amber-300 p-2 rounded flex-1 outline-none">
+                                <input type="text" id="reply-${item.message_id}" value="${item.reply_content || ''}" placeholder="追加组织部官方回复..." class="bg-slate-950 border border-slate-800 text-xs text-amber-300 p-2 rounded flex-1 outline-none">
                                 <button onclick="saveReply(${item.message_id})" class="text-xs bg-indigo-600 px-3 py-2 rounded font-bold">保存回复</button>
                             </div>
                         </div>
@@ -131,12 +145,12 @@
         async function saveReply(id) {
             const text = document.getElementById(`reply-${id}`).value;
             await supabaseClient.from('messages').update({ reply_content: text }).eq('message_id', id);
-            alert('官方回复已更新！');
+            alert('组织部回复已保存！');
             loadAdminData();
         }
 
         async function deleteMsg(id) {
-            if (confirm('确认物理删除该记录？不可恢复！')) {
+            if (confirm('确认删除？不可恢复！')) {
                 await supabaseClient.from('messages').delete().eq('message_id', id);
                 loadAdminData();
             }
